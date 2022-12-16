@@ -4,16 +4,28 @@ Authentication is the most common part in any application. You can implement you
 OAuth is a specification that allows users to delegate access to their data without sharing
 their username and password with that service, if you want to read more about Oauth2 go [here](https://oauth.net/2/).
  
- 
 ## Config Google Project
 First things first, we need to create our Google Project and create OAuth2 credentials.
 
 * Go to Google Cloud Platform
 * Create a new project or select one if you already have it.
 * Go to Credentials and then create a new one choosing  “OAuth client ID”
-* Add "authorized redirect URL", for this example `localhost:8000/auth/google/callback`
+* Add "authorized redirect URL", for this example `oauth.default.<your knative serving domain>/auth/google/callback`
 * Copy the client_id and client secret
 
+ ## Deploy as a Knative Service
+
+Create a kubernetes secret called `google-oauth-creds` with `client_id` and `client_secret` set with the values obtained in the previous section.
+
+Then, update the `RedirectURL` in the `googleOauthConfig` struct at the top of [oauth_google.go](./handlers/oauth_google.go).
+
+Set your `KO_DOCKER_REPO` env var to some registry you can push and pull from.
+
+Assuming you have Knative Serving installed and working, you can now just run:
+ ```
+ ko apply -f config/oauth-service.yaml
+ ```
+ 
 
 ## How OAuth2 works with Google
 The authorization sequence begins when your application redirects the browser to a Google URL; the URL includes query parameters that indicate the type of access being requested. Google handles the user authentication, session selection, and user consent. The result is an authorization code, which the application can exchange for an access token and a refresh token.

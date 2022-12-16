@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"log"
+	"net/http"
+
 	"github.com/douglasmakey/oauth2-example/handlers"
 )
 
 func main() {
 	// We create a simple server using http.Server and run.
 	server := &http.Server{
-		Addr: fmt.Sprintf(":8000"),
+		Addr:    fmt.Sprintf(":8080"),
 		Handler: handlers.New(),
 	}
 

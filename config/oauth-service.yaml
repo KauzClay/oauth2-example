@@ -1,0 +1,21 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+ name: oauth
+ namespace: default
+spec:
+ template:
+  spec:
+   containers:
+     - image: ko://github.com/douglasmakey/oauth2-example
+       env:
+        - name: GOOGLE_OAUTH_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: google-oauth-creds
+              key: client_id
+        - name: GOOGLE_OAUTH_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: google-oauth-creds
+              key: client_secret

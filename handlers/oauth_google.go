@@ -1,22 +1,23 @@
 package handlers
 
 import (
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-	"net/http"
+	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"context"
 	"log"
-	"encoding/base64"
-	"crypto/rand"
+	"net/http"
 	"os"
 	"time"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 // Scopes: OAuth 2.0 scopes provide a way to limit the amount of access that is granted to an access token.
 var googleOauthConfig = &oauth2.Config{
-	RedirectURL:  "http://localhost:8000/auth/google/callback",
+	RedirectURL:  "https://oauth.clay.tanzu.biz/auth/google/callback",
 	ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
 	ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
@@ -31,8 +32,8 @@ func oauthGoogleLogin(w http.ResponseWriter, r *http.Request) {
 	oauthState := generateStateOauthCookie(w)
 
 	/*
-	AuthCodeURL receive state that is a token to protect the user from CSRF attacks. You must always provide a non-empty string and
-	validate that it matches the the state query parameter on your redirect callback.
+		AuthCodeURL receive state that is a token to protect the user from CSRF attacks. You must always provide a non-empty string and
+		validate that it matches the the state query parameter on your redirect callback.
 	*/
 	u := googleOauthConfig.AuthCodeURL(oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
@@ -58,7 +59,18 @@ func oauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// GetOrCreate User in your db.
 	// Redirect or response with a token.
 	// More code .....
+
+	headers := []string{}
+	// Loop over header names
+	for name, values := range r.Header {
+		// Loop over all values for the name.
+		for _, value := range values {
+			headers = append(headers, fmt.Sprintf("%s: %s", name, value))
+		}
+	}
+
 	fmt.Fprintf(w, "UserInfo: %s\n", data)
+	fmt.Fprintf(w, "Headers: %s\n", headers)
 }
 
 func generateStateOauthCookie(w http.ResponseWriter) string {
